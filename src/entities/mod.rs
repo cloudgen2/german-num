@@ -1,8 +1,10 @@
 #[derive(Copy, Clone)]
 pub enum Sex {
+    Any,
     Male,
     Female
 }
+
 
 #[derive(Copy, Clone)]
 pub enum Fruit {
@@ -10,6 +12,7 @@ pub enum Fruit {
     Apple,
     Orange,
     Banana,
+    Grape,
     Strawberry,
     Pear,
     Cherry,
@@ -51,7 +54,9 @@ pub enum Food {
 
 #[derive(Copy, Clone)]
 pub enum Transport {
+    Ambulance,
     Any,
     Bus,
-    Car
+    Car,
+    Taxi
 }

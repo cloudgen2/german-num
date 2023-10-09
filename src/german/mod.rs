@@ -14,6 +14,7 @@ use crate::entities::Drink;
 use crate::entities::Transport;
 use crate::entities::Sex;
 use crate::thisis::ThisIs;
+use crate::multi_lang::Lang;
 
 use colored::*;
 use regex::Regex;
@@ -22,17 +23,21 @@ use number::all_num;
 pub struct Thing<'a> {
     sex: Sex,
     num: u32,
+    starts_with_vowel: bool,
     single: &'a str,
-    plural: &'a str
+    plural: &'a str,
+    lang: Lang
 }
 
 impl Thing<'_> {
-    pub fn new<'a> (sex: Sex, single: &'a str, plural: &'a str) -> Thing <'a>{
+    pub fn new<'a> (sex: Sex, starts_with_vowel: bool, single: &'a str, plural: &'a str) -> Thing <'a>{
         Thing {
             sex: sex,
+            starts_with_vowel: starts_with_vowel,
             num: 0,
             single: single, 
-            plural: plural    
+            plural: plural,
+            lang: Lang::German
         }
     }
 }
@@ -40,25 +45,106 @@ impl Thing<'_> {
 impl ThisIs for Thing<'_>  {
     fn number_of(&self) -> String {
         let mut result: String;
-        if self.num == 1 {
-            match self.sex {
-                Sex::Male => result=String::from("ein "),
-                Sex::Female => result=String::from("eine ")
+        match self.lang {
+            Lang::English => {
+                if self.num == 1 {
+                    if self.starts_with_vowel {
+                        result=String::from("an ")
+                    } else {
+                        result=String::from("a ")
+                    }
+                    result.push_str(self.single);
+                } else {
+                    result=String::from(all_num(self.num));
+                    result.push_str(" ");
+                    result.push_str(self.plural)
+                } 
+
+            },
+            Lang::French => {
+                if self.num == 1 {
+                    match self.sex {
+                        Sex::Any => result=String::from("un "),
+                        Sex::Male => result=String::from("un "),
+                        Sex::Female => result=String::from("une ")
+                    }
+                    result.push_str(self.single);
+                } else {
+                    result=String::from(all_num(self.num));
+                    result.push_str(" ");
+                    result.push_str(self.plural)
+                } 
+            },
+            Lang::German => {
+                if self.num == 1 {
+                    match self.sex {
+                        Sex::Any => result=String::from("ein "),
+                        Sex::Male => result=String::from("ein "),
+                        Sex::Female => result=String::from("eine ")
+                    }
+                    result.push_str(self.single);
+                } else {
+                    result=String::from(all_num(self.num));
+                    result.push_str(" ");
+                    result.push_str(self.plural)
+                }
+            },
+            Lang::Spanish => {
+                if self.num == 1 {
+                    match self.sex {
+                        Sex::Any => result=String::from("un "),
+                        Sex::Male => result=String::from("un "),
+                        Sex::Female => result=String::from("una ")
+                    }
+                    result.push_str(self.single);
+                } else {
+                    result=String::from(all_num(self.num));
+                    result.push_str(" ");
+                    result.push_str(self.plural)
+                }
             }
-            result.push_str(self.single);
-        } else {
-            result=String::from(all_num(self.num));
-            result.push_str(" ");
-            result.push_str(self.plural)
         }
         result
     }
     fn this_is(&self) -> String {
         let mut result:String;
-        if self.num == 1 {
-            result=String::from("Das ist ");
-        } else {
-            result=String::from("Das sind ");
+        match self.lang {
+            Lang::English => {
+                if self.num == 1 {
+                    result=String::from("This is ");
+                } else {
+                    result=String::from("These are ");
+                }        
+            },
+            Lang::French => {
+                if self.num == 1 {
+                    result=String::from("Ceci est ");
+                } else {
+                    result=String::from("Ce sont ");
+                }
+            },
+            Lang::German => {
+                if self.num == 1 {
+                    result=String::from("Das ist ");
+                } else {
+                    result=String::from("Das sind ");
+                }
+            },
+            Lang::Spanish => {
+                if self.num == 1 {
+                    match self.sex {
+                        Sex::Any => result=String::from("Este es "),
+                        Sex::Male => result=String::from("Este es "),
+                        Sex::Female => result=String::from("Esta es ")
+                    }
+                } else {
+                    match self.sex {
+                        Sex::Any => result=String::from("Estos son "),
+                        Sex::Male => result=String::from("Estos son "),
+                        Sex::Female => result=String::from("Estas son ")
+                    }
+                }
+            },
         }
         result.push_str(& self.number_of());
         result.push_str(".");
