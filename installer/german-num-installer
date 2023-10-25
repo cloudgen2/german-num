@@ -655,11 +655,18 @@ class AppBase(object):
             winpty = self.where_cmd('winpty.exe')
             curl = self.where_cmd('curl.exe')
             if url!='' and file!='':
+                file=self.path_to_dos(file)
                 stdout,stderr = Popen([winpty,curl,switches,'-o',file, url],stdin=PIPE,stdout=PIPE,\
                     stderr=PIPE,universal_newlines=True).communicate('\n')
+                if stderr.strip().lower() == 'stdin is not a tty':
+                    stdout,stderr = Popen([curl,switches,'-o',file, url],stdin=PIPE,stdout=PIPE,\
+                        stderr=PIPE,universal_newlines=True).communicate('\n')
             elif url!='':
                 stdout,stderr = Popen([winpty,curl,switches,url],stdin=PIPE,stdout=PIPE,\
                     stderr=PIPE,universal_newlines=True).communicate('\n')
+                if stderr.strip().lower() == 'stdin is not a tty':
+                    stdout,stderr = Popen([curl,switches,url],stdin=PIPE,stdout=PIPE,\
+                        stderr=PIPE,universal_newlines=True).communicate('\n')
         elif self.isCmd():
             curl = self.where_cmd('curl.exe')
             if url!='' and file!='':
@@ -1398,10 +1405,18 @@ class AppBase(object):
         return self.__target_app__
 
     def tempAppUrl(self):
-        return "%s%s/%d.%d/%s.tar.gz" % (self.downloadUrl(), self.binaryVersion(), self.majorVersion(),self.minorVersion(), self.targetApp())
+        if self.downloadUrl()[-1] == '/':
+            return "%s%s/%d.%d/%s.tar.gz" % (self.downloadUrl(), self.binaryVersion(), self.majorVersion(),self.minorVersion(), self.targetApp())
+        else:
+            return "%s/%s/%d.%d/%s.tar.gz" % (self.downloadUrl(), self.binaryVersion(), self.majorVersion(),self.minorVersion(), self.targetApp())
 
     def tempTargetGzip(self):
-        return "%s/%s-%s.tar.gz" % (self.tempFolder(), self.targetApp(),self.timestamp())
+        timestamp = self.timestamp()
+        if self.isLinuxShell():
+            return "%s/%s-%s.tar.gz" % (self.tempFolder(), self.targetApp(), timestamp)
+        elif self.isGitBash() or self.isCmd():
+            return "%s\%s-%s.tar.gz" % (self.tempFolder(), self.targetApp(), timestamp)
+        return "%s/%s-%s.tar.gz" % (self.tempFolder(), self.targetApp(), timestamp)
 
     def tempAttachDecomp(self):
         if self.isCmd():
@@ -1521,6 +1536,9 @@ class AppBase(object):
             uname = self.where_cmd('uname')
             stdout,stderr = Popen([winpty, uname,switch],stdin=PIPE,stdout=PIPE,\
                 stderr=PIPE,universal_newlines=True).communicate('\n')
+            if stderr.strip().lower() == 'stdin is not a tty':
+                stdout,stderr = Popen([uname,switch],stdin=PIPE,stdout=PIPE,\
+                    stderr=PIPE,universal_newlines=True).communicate('\n')
         elif self.isCmd():
             stdout,stderr = Popen([self.shellCmd(),'/c',command],stdin=PIPE,stdout=PIPE,\
                 stderr=PIPE,universal_newlines=True).communicate('\n')
