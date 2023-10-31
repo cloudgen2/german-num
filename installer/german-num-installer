@@ -902,7 +902,7 @@ class AppBase(object):
             if self.isCmd() or self.isGitBash():
                 self.tar_extract( self.path_to_dos(fname).split('\\')[-1] )
             else:
-                self.tar_extract(tar,fname.split('/')[-1])
+                self.tar_extract(fname.split('/')[-1])
             self.cmd_history("# ** Try to remove downloaded file **")
             self.removeFile(fname)
             if self.isCmd() or self.isGitBash():
@@ -911,7 +911,6 @@ class AppBase(object):
                 this = self.tempAttachDecomp()
             if self.pathexists(this):
                 self.this(this)
-                print(this)
                 if self.username() == 'root':
                     self.install_target_global(this)
                 else:
